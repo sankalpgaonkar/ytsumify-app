@@ -12,10 +12,10 @@ import {
   Sparkles,
   Youtube,
   ArrowRight,
-  RotateCcw,
   CheckCircle2,
 } from "lucide-react";
-import ytsumifyLogo from "@/assets/ytsumify-logo.png.asset.json";
+import ytsumifyLogo from "../assets/ytsumify-logo.png";
+
 
 /* ===================================================================
    WEBHOOK CONFIG — Update this URL as needed
@@ -180,15 +180,15 @@ function Index() {
       {/* Header */}
       <header className="w-full border-b border-border bg-surface-raised/60 backdrop-blur-md">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4 sm:px-6">
-          <div className="flex items-center gap-2.5">
-            <img src={ytsumifyLogo.url} alt="YTSumify logo" className="h-10 w-auto" />
+          <a href="/" className="flex items-center gap-2.5 transition-opacity hover:opacity-80">
+            <img src={ytsumifyLogo} alt="YTSumify logo" className="h-10 w-auto" />
             <div>
               <h1 className="text-lg font-semibold tracking-tight">YTSumify</h1>
               <p className="text-[11px] leading-none text-muted-foreground hidden sm:block">
                 AI-powered video summaries in seconds
               </p>
             </div>
-          </div>
+          </a>
           <a
             href="https://youtube.com"
             target="_blank"
