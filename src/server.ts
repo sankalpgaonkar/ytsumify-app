@@ -18,6 +18,16 @@ async function getServerEntry(): Promise<ServerEntry> {
   return serverEntryPromise;
 }
 
+function isLikelyVercelDeploymentError(response: Response, body: string): boolean {
+  const headerValue = response.headers.get("x-vercel-error") ?? response.headers.get("x-vercel-id") ?? "";
+  return (
+    body.includes("DEPLOYMENT_NOT_FOUND") ||
+    body.includes("The deployment could not be found") ||
+    body.includes("This deployment is no longer available") ||
+    body.includes("not found") && headerValue.length > 0
+  );
+}
+
 // h3 swallows in-handler throws into a normal 500 Response with body
 // {"unhandled":true,"message":"HTTPError"} — try/catch alone never fires for those.
 async function normalizeCatastrophicSsrResponse(response: Response): Promise<Response> {
@@ -42,6 +52,19 @@ export default {
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
+
+      if (response.status >= 500) {
+        const clone = response.clone();
+        const body = await clone.text();
+        if (isLikelyVercelDeploymentError(clone, body)) {
+          console.error(new Error(`Vercel deployment response error: ${body}`));
+          return new Response(renderErrorPage(), {
+            status: 500,
+            headers: { "content-type": "text/html; charset=utf-8" },
+          });
+        }
+      }
+
       return await normalizeCatastrophicSsrResponse(response);
     } catch (error) {
       console.error(error);
