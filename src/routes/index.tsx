@@ -28,15 +28,6 @@ const SUMMARY_RESPONSE_KEY = "summary";
 /* =================================================================== */
 
 export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "YTSumify — YouTube Video Summarizer" },
-      { name: "description", content: "Instantly summarize any YouTube video with AI. Paste a link, get a structured summary in seconds." },
-      { property: "og:title", content: "YTSumify — YouTube Video Summarizer" },
-      { property: "og:description", content: "Instantly summarize any YouTube video with AI." },
-      { property: "og:type", content: "website" },
-    ],
-  }),
   component: Index,
 });
 
