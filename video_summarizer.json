@@ -1,0 +1,193 @@
+{
+  "name": "video_summarizer",
+  "nodes": [
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        -240,
+        32
+      ],
+      "id": "ecd73179-58e1-4b93-93de-17d2092d6fc5",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "",
+          "name": ""
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a document processor and summarizer. Your job is to create a document with the summary, and ALSO return that exact same summary content directly to the user.\n\nStep-by-Step Execution Flow: \n1. Create Document: Use your Google Docs tool to create a new document and insert the generated summary inside it.\n2. Output Final Response (CRITICAL): After the document is successfully created, you MUST output the full summary text as your final response message. Do not just say \"I have created the document.\" You must output the actual bulleted summary text so it can be sent back to the webhook.\n\nHere is the transcript to process:\n{{ $json.data }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -240,
+        -160
+      ],
+      "id": "027564d0-4a8a-4822-9479-57fbe73b97d3",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "url": "=https://youtube-transcript.ai/transcript/{{ $json.body.url.match(/[a-zA-Z0-9_-]{11}/)[0] }}.txt",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -496,
+        -144
+      ],
+      "id": "3c7bacca-6bbd-41f8-8909-63703822c705",
+      "name": "Youtube transcript"
+    },
+    {
+      "parameters": {
+        "multipleMethods": true,
+        "httpMethod": [
+          "POST"
+        ],
+        "path": "Summarize",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -768,
+        -144
+      ],
+      "id": "d90a2b8c-bb29-4ef2-9448-0ac090251f25",
+      "name": "Webhook",
+      "webhookId": "48d4915e-c10d-427b-adcc-986d9e70d5d3",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"summary\": \"{{ $json.output.replace(/\"/g, '\\\\\"').replace(/\\n/g, '\\\\n') }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        240,
+        -160
+      ],
+      "id": "f3cd9690-b047-4cb6-9956-511ede53fed6",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "content": "https://youtu.be/KlxIUR1gud8?si=K3UEy0NUUejYaLaN"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        288,
+        112
+      ],
+      "typeVersion": 1,
+      "id": "88096dd2-42a1-4434-9b7f-b63763f3fe0b",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "folderId": "=",
+        "title": "="
+      },
+      "type": "n8n-nodes-base.googleDocsTool",
+      "typeVersion": 2,
+      "position": [
+        -96,
+        48
+      ],
+      "id": "7a7ab287-6479-4bdb-afaa-23c628e88250",
+      "name": "Create a document in Google Docs",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "",
+          "name": ""
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Youtube transcript": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Youtube transcript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a document in Google Docs": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "9957eeed-61bd-4fe3-8ca8-4b64b58292e0",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "969257b09ad2942bbaff2e2288304f4969030574d109cdeca05bf11f630884df"
+  },
+  "id": "nGOpKk2LKlm917YW",
+  "tags": []
+}
