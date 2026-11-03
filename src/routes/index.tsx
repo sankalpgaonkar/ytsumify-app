@@ -21,7 +21,8 @@ import ytsumifyLogo from "../assets/ytsumify-logo.png";
 /* ===================================================================
    WEBHOOK CONFIG — Update this URL as needed
    =================================================================== */
-const WEBHOOK_URL = "https://workflow.ccbp.in/webhook/Summarize";
+const WEBHOOK_URL =
+  import.meta.env.VITE_WEBHOOK_URL ?? "https://workflow.ccbp.in/webhook/Summarize";
 
 /* Key for reading the summary from the webhook response */
 const SUMMARY_RESPONSE_KEY = "summary";
@@ -164,7 +165,12 @@ function Index() {
         icon: <CheckCircle2 className="h-4 w-4" />,
       });
     } catch (err) {
-      const message = err instanceof Error ? err.message : "An unexpected error occurred.";
+      const message =
+        err instanceof TypeError
+          ? "Unable to reach the summarization service. Check the webhook URL and deployment."
+          : err instanceof Error
+            ? err.message
+            : "An unexpected error occurred.";
       setState({ status: "error", message });
       toast.error("Summarization failed", {
         description: message,

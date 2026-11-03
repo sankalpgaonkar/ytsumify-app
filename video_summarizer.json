@@ -74,7 +74,7 @@
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={\n  \"summary\": \"{{ $json.output.replace(/\"/g, '\\\\\"').replace(/\\n/g, '\\\\n') }}\"\n}",
+        "responseBody": "={{ JSON.stringify({ summary: $json.output }) }}",
         "options": {}
       },
       "type": "n8n-nodes-base.respondToWebhook",
