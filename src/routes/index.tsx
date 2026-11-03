@@ -13,6 +13,7 @@ import {
   Youtube,
   ArrowRight,
   CheckCircle2,
+  RotateCcw,
 } from "lucide-react";
 import ytsumifyLogo from "../assets/ytsumify-logo.png";
 
@@ -44,6 +45,29 @@ const LOADING_STAGES = [
   "AI is generating the summary…",
   "Polishing the final output…",
 ];
+
+function extractSummary(data: unknown): string | null {
+  if (typeof data === "string") return data.trim() || null;
+  if (!data || typeof data !== "object") return null;
+
+  const record = data as Record<string, unknown>;
+  const directSummary = record[SUMMARY_RESPONSE_KEY];
+  if (typeof directSummary === "string" && directSummary.trim()) {
+    return directSummary.trim();
+  }
+
+  const output = record.output;
+  if (typeof output === "string" && output.trim()) return output.trim();
+
+  if (Array.isArray(data)) {
+    for (const item of data) {
+      const summary = extractSummary(item);
+      if (summary) return summary;
+    }
+  }
+
+  return null;
+}
 
 /* ------------------------------------------------------------------
    YouTube URL validation
@@ -127,10 +151,10 @@ function Index() {
         throw new Error(`Server responded with ${res.status}: ${res.statusText}`);
       }
 
-      const data = await res.json();
-      const summary = data?.[SUMMARY_RESPONSE_KEY];
+      const data: unknown = await res.json();
+      const summary = extractSummary(data);
 
-      if (typeof summary !== "string" || !summary.trim()) {
+      if (!summary) {
         throw new Error("The response did not contain a valid summary.");
       }
 
